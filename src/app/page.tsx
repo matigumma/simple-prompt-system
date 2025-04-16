@@ -2,7 +2,9 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import PromptTabs, { Prompt as BasePrompt } from "./components/PromptTabs";
-import LLMSelector, { LLMOption } from "./components/LLMSelector";
+import dynamic from "next/dynamic";
+import { LLMOption } from "./components/LLMOption";
+const LLMSelector = dynamic(() => import("./components/LLMSelector"), { ssr: false });
 import PromptEditor from "./components/PromptEditor";
 import OutputPanel from "./components/OutputPanel";
 import PromptRunButton from "./components/PromptRunButton";
@@ -21,7 +23,16 @@ function openDB(): Promise<IDBDatabase> {
     req.onerror = () => reject(req.error);
   });
 }
-async function addHistory(entry: { promptId: string; prompt: string; result: string; timestamp: number }) {
+type HistoryEntry = {
+  id?: number;
+  promptId: string;
+  prompt: string;
+  result: string;
+  timestamp: number;
+  response?: any; // Full OpenAI API response
+};
+
+async function addHistory(entry: HistoryEntry) {
   const db = await openDB();
   const tx = db.transaction(DB_STORE, "readwrite");
   tx.objectStore(DB_STORE).add(entry);
@@ -30,7 +41,7 @@ async function addHistory(entry: { promptId: string; prompt: string; result: str
     tx.onerror = () => reject(tx.error);
   });
 }
-async function getAllHistory(): Promise<{ id: number; promptId: string; prompt: string; result: string; timestamp: number }[]> {
+async function getAllHistory(): Promise<HistoryEntry[]> {
   const db = await openDB();
   const tx = db.transaction(DB_STORE, "readonly");
   const store = tx.objectStore(DB_STORE);
@@ -341,7 +352,9 @@ export default function Home() {
   // const [variables, setVariables] = useState<{ name: string; value: string }[]>([]);
 
   // History state
-  const [history, setHistory] = useState<{ id: number; promptId: string; prompt: string; result: string; timestamp: number }[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [selectedHistory, setSelectedHistory] = useState<HistoryEntry | null>(null);
+  const [sidePanelOpen, setSidePanelOpen] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -507,6 +520,7 @@ export default function Home() {
             prompt: interpolatedContent,
             result: data.output,
             timestamp: Date.now(),
+            response: data.fullResponse,
           });
           // Reload history after adding
           const all = await getAllHistory();
@@ -524,194 +538,240 @@ export default function Home() {
   }, [activePrompt, selectedLLM]);
 
   return (
-    <div className="lg:w-[90%] m-auto">
-      <header className="py-2 text-center">
-        <h1 className="text-2xl font-bold tracking-tight">Prompt Training System</h1>
-      </header>
-      <div className="w-auto flex m-auto p-2">
-        <PromptTabs
-          prompts={prompts}
-          activePromptId={activePromptId}
-          onSelect={handleSelectPrompt}
-          onAdd={handleAddPrompt}
-          onRename={handleRenamePrompt}
-          onDelete={handleDeletePrompt}
-          onCopy={handleCopyPrompt}
-
-        />
-      </div>
-      <div className="w-full flex flex-col h-auto rounded-2xl overflow-clip">
-        <div className="flex flex-1 min-h-0">
-          {/* Left Panel */}
-          <div className="w-full md:w-1/2 bg-neutral-900 flex flex-col p-4 min-h-0">
-            <div className="flex items-center justify-between mb-2 gap-6">
-              {activePrompt && (
-                <PromptActions
-                  prompt={activePrompt}
-                  onRename={(newName) => handleRenamePrompt(activePrompt.id, newName)}
-                  onCopy={() => handleCopyPrompt(activePrompt.id)}
-                  onToggleJson={() => handleToggleJson(activePrompt.id)}
-                />
-              )}
-              <LLMSelector
-                options={llmOptions}
-                selectedId={selectedLLM}
-                onSelect={handleSelectLLM}
-              />
-            </div>
-            {/* Variable Manager */}
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-semibold text-xs text-neutral-300">Variables</span>
-                <button
-                  className="btn btn-xs btn-outline"
-                  onClick={() => {
-                    if (!activePrompt) return;
-                    setPrompts(prev =>
-                      prev.map(p =>
-                        p.id === activePrompt.id
-                          ? { ...p, variables: [...(p.variables || []), { name: "", value: "" }] }
-                          : p
-                      )
-                    );
-                  }}
-                  title="Add variable"
-                  type="button"
-                >+</button>
-              </div>
-              <div className="flex flex-col gap-1">
-                {(activePrompt?.variables?.length ?? 0) === 0 && (
-                  <span className="text-xs text-neutral-500">No variables defined.</span>
+    <>
+      <div className="lg:w-[90%] m-auto">
+        <header className="py-2 text-center">
+          <h1 className="text-2xl font-bold tracking-tight">Prompt Training System</h1>
+        </header>
+        <div className="w-auto flex m-auto p-2">
+          <PromptTabs
+            prompts={prompts}
+            activePromptId={activePromptId}
+            onSelect={handleSelectPrompt}
+            onAdd={handleAddPrompt}
+            onRename={handleRenamePrompt}
+            onDelete={handleDeletePrompt}
+            onCopy={handleCopyPrompt}
+          />
+        </div>
+        <div className="w-full flex flex-col h-auto rounded-2xl overflow-clip">
+          <div className="flex flex-1 min-h-0">
+            {/* Left Panel */}
+            <div className="w-full md:w-1/2 bg-neutral-900 flex flex-col p-4 min-h-0">
+              <div className="flex items-center justify-between mb-2 gap-6">
+                {activePrompt && (
+                  <PromptActions
+                    prompt={activePrompt}
+                    onRename={(newName) => handleRenamePrompt(activePrompt.id, newName)}
+                    onCopy={() => handleCopyPrompt(activePrompt.id)}
+                    onToggleJson={() => handleToggleJson(activePrompt.id)}
+                  />
                 )}
-                {(activePrompt?.variables || []).map((v, i) => (
-                  <div key={i} className="flex gap-1 items-center">
-                    <input
-                      className="input input-xs w-24"
-                      placeholder="name"
-                      value={v.name}
-                      onChange={e => {
-                        if (!activePrompt) return;
-                        const newVars = [...(activePrompt.variables || [])];
-                        newVars[i] = { ...newVars[i], name: e.target.value.replace(/[^a-zA-Z0-9_-]/g, "") };
-                        setPrompts(prev =>
-                          prev.map(p =>
-                            p.id === activePrompt.id
-                              ? { ...p, variables: newVars }
-                              : p
-                          )
-                        );
-                      }}
-                      title="Variable name"
-                    />
-                    <span className="text-neutral-400 text-xs px-1">{'='}</span>
-                    <input
-                      className="input input-xs w-32"
-                      placeholder="value"
-                      value={v.value}
-                      onChange={e => {
-                        if (!activePrompt) return;
-                        const newVars = [...(activePrompt.variables || [])];
-                        newVars[i] = { ...newVars[i], value: e.target.value };
-                        setPrompts(prev =>
-                          prev.map(p =>
-                            p.id === activePrompt.id
-                              ? { ...p, variables: newVars }
-                              : p
-                          )
-                        );
-                      }}
-                      title="Variable value"
-                    />
-                    <button
-                      className="btn btn-xs btn-error"
-                      title="Remove"
-                      onClick={() => {
-                        if (!activePrompt) return;
-                        setPrompts(prev =>
-                          prev.map(p =>
-                            p.id === activePrompt.id
-                              ? { ...p, variables: (activePrompt.variables || []).filter((_, idx) => idx !== i) }
-                              : p
-                          )
-                        );
-                      }}
-                      type="button"
-                    >×</button>
-                  </div>
-                ))}
+                <LLMSelector
+                  options={llmOptions}
+                  selectedId={selectedLLM}
+                  onSelect={handleSelectLLM}
+                />
               </div>
-              <div className="text-xs text-neutral-400 mt-1">
-                Use <span className="font-mono bg-neutral-800 px-1 rounded">{'{{variable_name}}'}</span> in your prompt.
+              {/* Variable Manager */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-semibold text-xs text-neutral-300">Variables</span>
+                  <button
+                    className="btn btn-xs btn-outline"
+                    onClick={() => {
+                      if (!activePrompt) return;
+                      setPrompts(prev =>
+                        prev.map(p =>
+                          p.id === activePrompt.id
+                            ? { ...p, variables: [...(p.variables || []), { name: "", value: "" }] }
+                            : p
+                        )
+                      );
+                    }}
+                    title="Add variable"
+                    type="button"
+                  >+</button>
+                </div>
+                <div className="flex flex-col gap-1">
+                  {(activePrompt?.variables?.length ?? 0) === 0 && (
+                    <span className="text-xs text-neutral-500">No variables defined.</span>
+                  )}
+                  {(activePrompt?.variables || []).map((v, i) => (
+                    <div key={i} className="flex gap-1 items-center">
+                      <input
+                        className="input input-xs w-24"
+                        placeholder="name"
+                        value={v.name}
+                        onChange={e => {
+                          if (!activePrompt) return;
+                          const newVars = [...(activePrompt.variables || [])];
+                          newVars[i] = { ...newVars[i], name: e.target.value.replace(/[^a-zA-Z0-9_-]/g, "") };
+                          setPrompts(prev =>
+                            prev.map(p =>
+                              p.id === activePrompt.id
+                                ? { ...p, variables: newVars }
+                                : p
+                            )
+                          );
+                        }}
+                        title="Variable name"
+                      />
+                      <span className="text-neutral-400 text-xs px-1">{'='}</span>
+                      <input
+                        className="input input-xs w-32"
+                        placeholder="value"
+                        value={v.value}
+                        onChange={e => {
+                          if (!activePrompt) return;
+                          const newVars = [...(activePrompt.variables || [])];
+                          newVars[i] = { ...newVars[i], value: e.target.value };
+                          setPrompts(prev =>
+                            prev.map(p =>
+                              p.id === activePrompt.id
+                                ? { ...p, variables: newVars }
+                                : p
+                            )
+                          );
+                        }}
+                        title="Variable value"
+                      />
+                      <button
+                        className="btn btn-xs btn-error"
+                        title="Remove"
+                        onClick={() => {
+                          if (!activePrompt) return;
+                          setPrompts(prev =>
+                            prev.map(p =>
+                              p.id === activePrompt.id
+                                ? { ...p, variables: (activePrompt.variables || []).filter((_, idx) => idx !== i) }
+                                : p
+                            )
+                          );
+                        }}
+                        type="button"
+                      >×</button>
+                    </div>
+                  ))}
+                </div>
+                <div className="text-xs text-neutral-400 mt-1">
+                  Use <span className="font-mono bg-neutral-800 px-1 rounded">{'{{variable_name}}'}</span> in your prompt.
+                </div>
+              </div>
+              <PromptEditor
+                value={activePrompt?.content || ""}
+                onChange={handlePromptContentChange}
+                disabled={isLoading}
+              />
+              <div className="flex flex-row items-center gap-2 mt-4">
+                <button
+                  className="btn btn-error btn-outline"
+                  title="Delete prompt"
+                  disabled={!activePrompt}
+                  onClick={() => activePrompt && handleDeletePrompt(activePrompt.id)}>
+                  Eliminar
+                </button>
+                <PromptRunButton
+                  onClick={handleRunPrompt}
+                  disabled={isLoading || !activePrompt}
+                  loading={isLoading}
+                />
               </div>
             </div>
-            <PromptEditor
-              value={activePrompt?.content || ""}
-              onChange={handlePromptContentChange}
-              disabled={isLoading}
-            />
-            <div className="flex flex-row items-center gap-2 mt-4">
-              <button
-                className="btn btn-error btn-outline"
-                title="Delete prompt"
-                disabled={!activePrompt}
-                onClick={() => activePrompt && handleDeletePrompt(activePrompt.id)}>
-                Eliminar
-              </button>
-              <PromptRunButton
-                onClick={handleRunPrompt}
-                disabled={isLoading || !activePrompt}
-                loading={isLoading}
+            {/* Right Panel */}
+            <div className="w-full md:w-1/2 bg-neutral-50 dark:bg-neutral-950 flex flex-col p-4 min-h-0">
+              <OutputPanel
+                output={output}
+                isLoading={isLoading}
+                isJsonExpected={!!activePrompt?.isJsonOutput}
+                onCopy={handleCopyOutput}
+                error={error}
               />
             </div>
           </div>
-          {/* Right Panel */}
-          <div className="w-full md:w-1/2 bg-neutral-50 dark:bg-neutral-950 flex flex-col p-4 min-h-0">
-            <OutputPanel
-              output={output}
-              isLoading={isLoading}
-              isJsonExpected={!!activePrompt?.isJsonOutput}
-              onCopy={handleCopyOutput}
-              error={error}
-            />
+        </div>
+        {/* History Table */}
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-2">Prompt History</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full border text-sm">
+              <thead>
+                <tr className="bg-neutral-200 dark:bg-neutral-800">
+                  <th className="border px-2 py-1">#</th>
+                  <th className="border px-2 py-1">Prompt</th>
+                  <th className="border px-2 py-1">Result</th>
+                  <th className="border px-2 py-1">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.filter(h => h.promptId === activePromptId).length === 0 ? (
+                  <tr>
+                    <td className="border px-2 py-1 text-center" colSpan={4}>No history yet.</td>
+                  </tr>
+                ) : (
+                  history
+                    .filter(h => h.promptId === activePromptId)
+                    .slice()
+                    .sort((a, b) => b.timestamp - a.timestamp)
+                    .map((h, i) => (
+                      <tr
+                        key={h.id ?? i}
+                        className="cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                        onClick={() => {
+                          setSelectedHistory(h);
+                          setSidePanelOpen(true);
+                        }}
+                      >
+                        <td className="border px-2 py-1">{i + 1}</td>
+                        <td className="border px-2 py-1 max-w-xs break-words truncate">{h.prompt}</td>
+                        <td className="border px-2 py-1 max-w-xs break-words truncate">{h.result}</td>
+                        <td className="border px-2 py-1">{new Date(h.timestamp).toLocaleString()}</td>
+                      </tr>
+                    ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-      {/* History Table */}
-      <div className="mt-8">
-        <h2 className="text-lg font-semibold mb-2">Prompt History</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full border text-sm">
-            <thead>
-              <tr className="bg-neutral-200 dark:bg-neutral-800">
-                <th className="border px-2 py-1">#</th>
-                <th className="border px-2 py-1">Prompt</th>
-                <th className="border px-2 py-1">Result</th>
-                <th className="border px-2 py-1">Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.filter(h => h.promptId === activePromptId).length === 0 ? (
-                <tr>
-                  <td className="border px-2 py-1 text-center" colSpan={4}>No history yet.</td>
-                </tr>
-              ) : (
-                history
-                  .filter(h => h.promptId === activePromptId)
-                  .slice()
-                  .sort((a, b) => b.timestamp - a.timestamp)
-                  .map((h, i) => (
-                    <tr key={h.id}>
-                      <td className="border px-2 py-1">{i + 1}</td>
-                      <td className="border px-2 py-1 max-w-xs break-words truncate">{h.prompt}</td>
-                      <td className="border px-2 py-1 max-w-xs break-words truncate">{h.result}</td>
-                      <td className="border px-2 py-1">{new Date(h.timestamp).toLocaleString()}</td>
-                    </tr>
-                  ))
-              )}
-            </tbody>
-          </table>
+      {/* Side Panel for History Details */}
+      {sidePanelOpen && selectedHistory && (
+        <div
+          className="fixed top-0 right-0 h-full w-full md:w-[480px] bg-white dark:bg-neutral-900 shadow-2xl z-50 border-l border-neutral-200 dark:border-neutral-800 transition-all"
+          style={{ maxWidth: "100vw", overflowY: "auto" }}
+        >
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-800">
+              <h3 className="text-lg font-semibold">History Details</h3>
+              <button
+                className="btn btn-sm btn-outline"
+                onClick={() => setSidePanelOpen(false)}
+                title="Close"
+              >×</button>
+            </div>
+            <div className="p-4 flex-1 overflow-y-auto">
+              <div className="mb-4">
+                <div className="text-xs text-neutral-500 mb-1">Prompt</div>
+                <pre className="bg-neutral-100 dark:bg-neutral-800 rounded p-2 whitespace-pre-wrap break-words">{selectedHistory?.prompt}</pre>
+              </div>
+              <div className="mb-4">
+                <div className="text-xs text-neutral-500 mb-1">Result</div>
+                <pre className="bg-neutral-100 dark:bg-neutral-800 rounded p-2 whitespace-pre-wrap break-words">{selectedHistory?.result}</pre>
+              </div>
+              <div className="mb-4">
+                <div className="text-xs text-neutral-500 mb-1">Timestamp</div>
+                <div>{selectedHistory ? new Date(selectedHistory.timestamp).toLocaleString() : ""}</div>
+              </div>
+              <div>
+                <div className="text-xs text-neutral-500 mb-1">Full OpenAI API Response</div>
+                <pre className="bg-neutral-100 dark:bg-neutral-800 rounded p-2 whitespace-pre-wrap break-words text-xs" style={{ maxHeight: 300, overflowY: "auto" }}>
+                  {selectedHistory ? JSON.stringify(selectedHistory.response, null, 2) : ""}
+                </pre>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div >
+      )}
+    </>
   );
 }

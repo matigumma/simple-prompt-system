@@ -65,14 +65,6 @@ const OutputPanel: React.FC<OutputPanelProps> = ({
         <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-2">
                 <span className="font-semibold text-sm">Output</span>
-                <button
-                    className="text-xs px-2 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
-                    onClick={onCopy}
-                    disabled={!output}
-                    title="Copy output"
-                >
-                    📋 Copy
-                </button>
             </div>
             <div className="flex-1 overflow-auto min-h-[120px] max-h-[400px]">
                 {isLoading ? (

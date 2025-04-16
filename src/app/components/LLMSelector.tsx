@@ -1,12 +1,7 @@
 "use client";
 import React, { useMemo } from "react";
 import Select, { GroupBase, SingleValue } from "react-select";
-
-export type LLMOption = {
-    id: string;
-    name: string;
-    group?: "Reasoning" | "Chat" | "Cost Optimized";
-};
+import { LLMOption } from "./LLMOption";
 
 type LLMSelectorProps = {
     options: LLMOption[];
@@ -64,6 +59,7 @@ const LLMSelector: React.FC<LLMSelectorProps> = ({ options, selectedId, onSelect
             <div className="flex-1 min-w-[250px]">
                 <Select<LLMOption, false, GroupBase<LLMOption>>
                     inputId="llm-select"
+                    instanceId="llm-select"
                     classNamePrefix="llm-select"
                     options={groupedOptions}
                     value={selectedOption}

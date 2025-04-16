@@ -17,7 +17,7 @@ export async function runPromptServerAction({
     prompt,
     model,
     instructions,
-}: RunPromptArgs): Promise<{ output: string | null; error: string | null }> {
+}: RunPromptArgs): Promise<{ output: string | null; error: string | null; fullResponse?: any }> {
     console.log(
         "Running prompt with model:",
         model,
@@ -60,7 +60,8 @@ export async function runPromptServerAction({
                 .trim();
             if (output.length === 0) output = null;
         }
-        return { output, error: null };
+        // Return the full response as well for history
+        return { output, error: null, fullResponse: response };
     } catch (err: any) {
         console.error(err);
         return { output: null, error: err?.message || "Unknown error" };
