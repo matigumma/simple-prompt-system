@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 import OpenAI from "openai";
+import { Prompt } from "../components/PromptTabs";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
 type RunPromptArgs = {
-    prompt: string;
+    prompt: Prompt;
     model: string;
     instructions?: string;
 };
@@ -29,7 +30,16 @@ export async function runPromptServerAction({
         const response = await openai.responses.create({
             model,
             ...(instructions ? { instructions } : {}),
-            input: prompt,
+            input: prompt.content,
+            ...(prompt.isJsonOutput
+                ? {
+                    text: {
+                        "format": {
+                            "type": "json_object",
+                        },
+                    },
+                }
+                : {}),
         });
 
         // Prefer output_text if available, else aggregate from output array

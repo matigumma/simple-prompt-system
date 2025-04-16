@@ -5,14 +5,13 @@ import React, { useState } from "react";
 type PromptActionsProps = {
     prompt: any;
     onRename: (newName: string) => void;
-    onCopy: () => void;
+    onCopy?: () => void;
     onToggleJson: () => void;
 };
 
 const PromptActions: React.FC<PromptActionsProps> = ({
     prompt,
     onRename,
-    onCopy,
     onToggleJson,
 }) => {
     const [editing, setEditing] = useState(false);
@@ -30,14 +29,14 @@ const PromptActions: React.FC<PromptActionsProps> = ({
 
     return (
         <div className="flex flex-row items-center gap-2">
-            <label className="fieldset-label">
+            <label className={`fieldset-label ${prompt.isJsonOutput ? "text-green-500" : ""}`}>
                 JSON
                 <input type="checkbox" checked={prompt.isJsonOutput} onChange={onToggleJson} className="toggle" />
             </label>
 
             {editing ? (
                 <input
-                    className="w-32 px-1 py-0.5 rounded border text-sm"
+                    className="input input-ghost w-56"
                     value={editValue}
                     autoFocus
                     onChange={(e) => setEditValue(e.target.value)}
@@ -49,7 +48,7 @@ const PromptActions: React.FC<PromptActionsProps> = ({
                 />
             ) : (
                 <>
-                    <span className="font-medium text-sm truncate max-w-[120px]">{prompt.name}</span>
+                    <span className="font-medium text-sm">{prompt.name}</span>
                     <button
                         className="text-xs text-gray-500 hover:text-blue-600"
                         title="Rename"
@@ -60,13 +59,13 @@ const PromptActions: React.FC<PromptActionsProps> = ({
                 </>
             )}
 
-            <button
+            {/* <button
                 className="btn btn-xs btn-soft btn-primary"
                 onClick={onCopy}
                 title="Copy output"
             >
                 📋 Copy
-            </button>
+            </button> */}
 
         </div>
     );

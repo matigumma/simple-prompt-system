@@ -4,8 +4,8 @@ import { runPromptServerAction } from "../../actions/runPrompt";
 
 export async function POST(req: NextRequest) {
     try {
-        const { prompt, model, instructions } = await req.json();
-        const result = await runPromptServerAction({ prompt, model, instructions });
+        const { activePrompt, model, instructions } = await req.json();
+        const result = await runPromptServerAction({ prompt: activePrompt, model, instructions });
         return NextResponse.json(result);
     } catch (err: any) {
         return NextResponse.json(

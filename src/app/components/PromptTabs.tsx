@@ -24,31 +24,27 @@ const PromptTabs: React.FC<PromptTabsProps> = ({
     onSelect,
     onAdd,
 }) => {
-
     return (
-        <div className=" inline-flex m-auto ">
-            <div className="tabs tabs-box tabs-xs w-auto flex flex-nowrap">
+        <div className="inline-flex items-center m-auto gap-2">
+            <select
+                className="select select-bordered select-xs w-auto max-w-xs"
+                value={activePromptId}
+                onChange={e => onSelect(e.target.value)}
+                title="Select prompt"
+            >
                 {prompts.map((prompt) => (
-                    <input
-                        key={prompt.id}
-                        type="radio"
-                        name="prompt_tabs"
-                        className="tab"
-                        aria-label={prompt.name}
-                        checked={prompt.id === activePromptId}
-                        onChange={() => onSelect(prompt.id)}
-                        title={prompt.name}
-                        style={{ maxWidth: 120 }}
-                    />
+                    <option key={prompt.id} value={prompt.id}>
+                        {prompt.name || "Untitled"}
+                    </option>
                 ))}
-                <button
-                    className="btn btn-primary btn-xs"
-                    title="Add new prompt"
-                    onClick={onAdd}
-                >
-                    +
-                </button>
-            </div>
+            </select>
+            <button
+                className="btn btn-primary btn-xs"
+                title="Add new prompt"
+                onClick={onAdd}
+            >
+                +
+            </button>
         </div>
     );
 };
