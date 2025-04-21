@@ -1,18 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
+import { Prompt } from "../types"; // Import Prompt type
 
 type PromptActionsProps = {
-    prompt: any;
+    prompt: Prompt; // Use imported Prompt type
     onRename: (newName: string) => void;
     onCopy?: () => void;
-    onToggleJson: () => void;
 };
 
 const PromptActions: React.FC<PromptActionsProps> = ({
     prompt,
     onRename,
-    onToggleJson,
 }) => {
     const [editing, setEditing] = useState(false);
     const [editValue, setEditValue] = useState(prompt.name);
@@ -29,11 +28,10 @@ const PromptActions: React.FC<PromptActionsProps> = ({
 
     return (
         <div className="flex flex-row items-center gap-2">
-            <label className={`fieldset-label ${prompt.isJsonOutput ? "text-green-500" : ""}`}>
-                JSON
-                <input type="checkbox" checked={prompt.isJsonOutput} onChange={onToggleJson} className="toggle" />
+            {/* <div className="mb-2 flex items-center gap-2 min-w-[200px]"> */}
+            <label htmlFor="llm-select" className="text-sm font-bold">
+                Prompt Name:
             </label>
-
             {editing ? (
                 <input
                     className="input input-ghost w-56"
@@ -58,15 +56,6 @@ const PromptActions: React.FC<PromptActionsProps> = ({
                     </button>
                 </>
             )}
-
-            {/* <button
-                className="btn btn-xs btn-soft btn-primary"
-                onClick={onCopy}
-                title="Copy output"
-            >
-                📋 Copy
-            </button> */}
-
         </div>
     );
 };

@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import ReactMarkdown from "react-markdown";
 
 type OutputPanelProps = {
     output: string;
@@ -26,7 +27,6 @@ const OutputPanel: React.FC<OutputPanelProps> = ({
     error,
 }) => {
     let content;
-    // let jsonError = null;
 
     if (isJsonExpected && output) {
         const { formatted, error: jsonErr } = tryFormatJson(output);
@@ -45,13 +45,12 @@ const OutputPanel: React.FC<OutputPanelProps> = ({
                     <div className="text-xs text-red-600 mt-1">{jsonErr}</div>
                 </div>
             );
-            // jsonError = jsonErr;
         }
     } else if (output) {
         content = (
-            <pre className="bg-neutral-100 dark:bg-neutral-800 rounded p-2 text-xs overflow-x-auto">
-                {output}
-            </pre>
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+                <ReactMarkdown>{output}</ReactMarkdown>
+            </div>
         );
     } else {
         content = (
@@ -65,6 +64,15 @@ const OutputPanel: React.FC<OutputPanelProps> = ({
         <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-2">
                 <span className="font-semibold text-sm">Output</span>
+                <button
+                    className="btn btn-xs btn-outline"
+                    onClick={onCopy}
+                    disabled={!output}
+                    title="Copy output"
+                    type="button"
+                >
+                    📋 Copy
+                </button>
             </div>
             <div className="flex-1 overflow-auto min-h-[120px] max-h-[400px]">
                 {isLoading ? (

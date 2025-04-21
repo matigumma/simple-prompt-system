@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 import OpenAI from "openai";
-import { Prompt } from "../components/PromptTabs";
+import { Prompt } from "../types";
+// Removed history imports - history saving moved back to client
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -13,6 +14,7 @@ type RunPromptArgs = {
     instructions?: string;
 };
 
+// Restore return type to include fullResponse
 export async function runPromptServerAction({
     prompt,
     model,
@@ -23,9 +25,8 @@ export async function runPromptServerAction({
         model,
         "instructions:",
         instructions ? `\n${instructions}` : "<none>",
-        "prompt:",
-        prompt ? `\n${prompt}` : "<none>",
     );
+
     try {
         const response = await openai.responses.create({
             model,
@@ -60,10 +61,14 @@ export async function runPromptServerAction({
                 .trim();
             if (output.length === 0) output = null;
         }
-        // Return the full response as well for history
+
+        // History saving removed from here
+        // Return the full response along with output and error
         return { output, error: null, fullResponse: response };
-    } catch (err: any) {
-        console.error(err);
-        return { output: null, error: err?.message || "Unknown error" };
+
+    } catch (err: unknown) { // Use unknown for better type safety
+        console.error("Error calling OpenAI:", err);
+        const errorMessage = err instanceof Error ? err.message : "Unknown error calling OpenAI";
+        return { output: null, error: errorMessage, fullResponse: null }; // Include fullResponse: null on error
     }
 }
