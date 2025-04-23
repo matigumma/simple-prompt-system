@@ -5,10 +5,14 @@ import { Prompt } from '@/app/(features)/prompt-editor/types'; // Import from ed
 const DEFAULT_PROMPTS: Prompt[] = [
     {
         id: "ad-hoc",
-        name: "Ad-hoc (Quick Prompt)",
-        content: `Summarize the content with 3 hot takes biased toward the author and 3 hot takes biased against the author
+        name: "Nivel 1: Directo",
+        description: `- Prompts rápidos en lenguaje natural para prototipado ágil
+- Perfecto para explorar capacidades y comportamientos del modelo
+- Se pueden ejecutar en múltiples modelos para comparación
+- Ideal para tareas puntuales y experimentación`,
+        content: `Resume el contenido con 3 opiniones a favor del autor y 3 opiniones en contra del autor
 
-...paste content here...`,
+...pega el contenido aquí...`,
         isJsonOutput: false,
         variables: [],
         llmId: "gpt-4.1-mini",
@@ -16,60 +20,70 @@ const DEFAULT_PROMPTS: Prompt[] = [
     },
     {
         id: "structured",
-        name: "Structured Prompt (Purpose + Instructions)",
-        content: `<purpose>
-Summarize the given content based on the instructions and example-output
-</purpose>
+        name: "Nivel 2: Estructurado",
+        description: `- Prompts reutilizables con propósito e instrucciones claras
+- Usa formato XML/estructurado para mejor rendimiento del modelo
+- Contiene variables estáticas que se pueden modificar
+- Resuelve problemas bien definidos y repetibles
+- Prompting sin ejemplos (zero-shot) suele ser eficaz con reasoning models`,
+        content: `<proposito>
+    Resume el contenido dado según las instrucciones y el ejemplo de salida
+</proposito>
 
-<instructions>
-  <instruction>Output in markdown format</instruction>
-  <instruction>Summarize into 4 sections: High level summary, Main Points, Sentiment, and 3 hot takes biased toward the author and 3 hot takes biased against the author</instruction>
-  <instruction>Write the summary in the same format as the example-output</instruction>
-</instructions>
+<instrucciones>
+   <instruccion>Salida en formato markdown</instruccion>
+   <instruccion>Resume en 4 secciones: Resumen general, Puntos principales, Sentimiento, y 3 opiniones a favor del autor y 3 opiniones en contra del autor</instruccion>
+   <instruccion>Escribe el resumen en el mismo formato que el ejemplo de salida</instruccion>
+</instrucciones>
 
-<content>
-  ...paste content here...
-</content>`,
+<contenido>
+    {...} <<< actualiza esto manualmente
+</contenido>`,
         isJsonOutput: false,
         variables: [],
-        llmId: "gpt-4.1-mini",
+        llmId: "o3-mini",
         instructions: ""
     },
     {
         id: "few-shot",
-        name: "Few-Shot (Structured + Example Output)",
-        content: `<purpose>
-Summarize the given content based on the instructions and example-output
-</purpose>
+        name: "Nivel 3: Estructurado con ejemplos",
+        description: `- Se basa en el Nivel 2 añadiendo ejemplos de salida (few-shot)
+- Los ejemplos guían al modelo para producir formatos específicos
+- Aumenta la consistencia y confiabilidad de las salidas
+- Perfecto cuando el formato de salida es importante`,
+        content: `<proposito>
+    Resume el contenido dado según las instrucciones y el ejemplo de salida
+</proposito>
 
-<instructions>
-  <instruction>Output in markdown format</instruction>
-  <instruction>Summarize into 4 sections: High level summary, Main Points, Sentiment, and 3 hot takes biased toward the author and 3 hot takes biased against the author</instruction>
-  <instruction>Write the summary in the same format as the example-output</instruction>
-</instructions>
+<instrucciones>
+   <instruccion>Salida en formato markdown</instruccion>
+   <instruccion>Resume en 4 secciones: Resumen general, Puntos principales, Sentimiento, y 3 opiniones a favor del autor y 3 opiniones en contra del autor</instruccion>
+   <instruccion>Escribe el resumen en el mismo formato que el ejemplo de salida</instruccion>
+</instrucciones>
 
-<example-output>
-# Title
+<ejemplo-salida>
 
-## High Level Summary
-...
+    # Título
 
-## Main Points
-...
+    ## Resumen General
+    ...
 
-## Sentiment
-...
+    ## Puntos Principales
+    ...
 
-## Hot Takes (biased toward the author)
-...
+    ## Sentimiento
+    ...
 
-## Hot Takes (biased against the author)
-...
-</example-output>
+    ## Opiniones (a favor del autor)
+    ...
 
-<content>
-  ...paste content here...
-</content>`,
+    ## Opiniones (en contra del autor)
+    ...
+</ejemplo-salida>
+
+<contenido>
+    {...} <<< actualiza esto manualmente
+</contenido>`,
         isJsonOutput: false,
         variables: [],
         llmId: "gpt-4.1-mini",
@@ -77,39 +91,44 @@ Summarize the given content based on the instructions and example-output
     },
     {
         id: "dynamic-vars",
-        name: "Dynamic Variables (Production-ready)",
-        content: `<purpose>
-Summarize the given content based on the instructions and example-output
-</purpose>
+        name: "Nivel 4: Variables dinamicas",
+        description: `- Prompts listos para producción con variables dinámicas
+- Se pueden integrar en código y aplicaciones
+- Escalabilidad infinita mediante actualizaciones programáticas
+- Base para construir herramientas y agentes potenciados por IA`,
+        content: `<proposito>
+    Resume el contenido dado según las instrucciones y el ejemplo de salida
+</proposito>
 
-<instructions>
-  <instruction>Output in markdown format</instruction>
-  <instruction>Summarize into 4 sections: High level summary, Main Points, Sentiment, and 3 hot takes biased toward the author and 3 hot takes biased against the author</instruction>
-  <instruction>Write the summary in the same format as the example-output</instruction>
-</instructions>
+<instrucciones>
+   <instruccion>Salida en formato markdown</instruccion>
+   <instruccion>Resume en 4 secciones: Resumen general, Puntos principales, Sentimiento, y 3 opiniones a favor del autor y 3 opiniones en contra del autor</instruccion>
+   <instruccion>Escribe el resumen en el mismo formato que el ejemplo de salida</instruccion>
+</instrucciones>
 
-<example-output>
-# Title
+<ejemplo-salida>
 
-## High Level Summary
-...
+    # Título
 
-## Main Points
-...
+    ## Resumen General
+    ...
 
-## Sentiment
-...
+    ## Puntos Principales
+    ...
 
-## Hot Takes (biased toward the author)
-...
+    ## Sentimiento
+    ...
 
-## Hot Takes (biased against the author)
-...
-</example-output>
+    ## Opiniones (a favor del autor)
+    ...
 
-<content>
-  {{content}}
-</content>`,
+    ## Opiniones (en contra del autor)
+    ...
+</ejemplo-salida>
+
+<contenido>
+    {{content}}
+</contenido>`,
         isJsonOutput: false,
         variables: [{ name: "content", value: "" }],
         llmId: "gpt-4.1-mini",
@@ -118,37 +137,37 @@ Summarize the given content based on the instructions and example-output
     {
         id: "openai-best-practice",
         name: "OpenAI Best Practice (Identity/Instructions/Examples/Context)",
-        content: `# Identity
-You are a helpful assistant that labels short product reviews as Positive, Negative, or Neutral.
+        description: "",
+        content: `# Identidad
+Eres un asistente útil que etiqueta reseñas cortas de productos como Positiva, Negativa o Neutral.
 
-# Instructions
-* Only output a single word in your response with no additional formatting or commentary.
-* Your response should only be one of the words "Positive", "Negative", or "Neutral" depending on the sentiment of the product review you are given.
+# Instrucciones
+Solo responde con una sola palabra, sin formato ni comentarios adicionales.
+Tu respuesta debe ser únicamente una de las palabras "Positiva", "Negativa" o "Neutral" dependiendo del sentimiento de la reseña de producto que se te proporcione.
 
-# Examples
-
+# Ejemplos
 <product_review id="example-1">
-I absolutely love these headphones — sound quality is amazing!
+    Me encantan estos auriculares: ¡la calidad de sonido es increíble!
 </product_review>
 <assistant_response id="example-1">
-Positive
+    Positiva
 </assistant_response>
 
 <product_review id="example-2">
-Battery life is okay, but the ear pads feel cheap.
+    La batería está bien, pero las almohadillas se sienten baratas.
 </product_review>
 <assistant_response id="example-2">
-Neutral
+    Neutral
 </assistant_response>
 
 <product_review id="example-3">
-Terrible customer service, I'll never buy from them again.
+    El servicio al cliente es terrible, nunca volveré a comprarles.
 </product_review>
 <assistant_response id="example-3">
-Negative
+    Negativa
 </assistant_response>
 
-# Context
+# Contexto
 <product_review>
 {{review}}
 </product_review>`,
@@ -160,13 +179,14 @@ Negative
     {
         id: "chain-of-thought",
         name: "Chain-of-Thought Reasoning",
-        content: `You are an expert problem solver. Think step by step to break down the problem and explain your reasoning.
+        description: "",
+        content: `Eres un experto en la resolución de problemas. Piensa paso a paso para descomponer el problema y explicar tu razonamiento.
 
-Question: {{question}}
+Pregunta: {{question}}
 
-First, think carefully step by step about what documents or information are needed to answer the query. Then, print out the TITLE and ID of each document. Then, format the IDs into a list.
+Primero, piensa cuidadosamente paso a paso qué documentos o información se necesitan para responder la consulta. Luego, imprime el TÍTULO y el ID de cada documento. Después, formatea los IDs en una lista.
 
-Answer:`,
+Respuesta:`,
         isJsonOutput: false,
         variables: [{ name: "question", value: "" }],
         llmId: "o3-mini",
@@ -175,44 +195,28 @@ Answer:`,
     {
         id: "json-output",
         name: "Structured Output (JSON)",
-        content: `Summarize the following content and output the result as a JSON object with the following fields:
-- "summary": a concise summary of the content
-- "main_points": an array of the main points
-- "sentiment": "positive", "neutral", or "negative"
-- "hot_takes_for": array of 3 hot takes biased toward the author
-- "hot_takes_against": array of 3 hot takes biased against the author
+        description: "",
+        content: `Resume el siguiente contenido y muestra el resultado como un objeto JSON con los siguientes campos:
 
-Content:
+"summary": un resumen conciso del contenido
+"main_points": un arreglo con los puntos principales
+"sentiment": "positive", "neutral" o "negative"
+"hot_takes_for": arreglo de 3 opiniones polémicas a favor del autor
+"hot_takes_against": arreglo de 3 opiniones polémicas en contra del autor
+
+Contenido:
 {{content}}
 
-Respond ONLY with valid JSON.`,
+Responde ÚNICAMENTE con JSON válido.`,
         isJsonOutput: true,
         variables: [{ name: "content", value: "" }],
         llmId: "gpt-4.1-mini",
         instructions: ""
     },
     {
-        id: "agentic-system",
-        name: "Agentic Workflow (System Prompt)",
-        content: `## PERSISTENCE
-You are an agent - keep going until the user's query is completely resolved, before ending your turn and yielding back to the user. Only terminate your turn when you are sure that the problem is solved.
-
-## TOOL CALLING
-If you are not sure about file content or codebase structure pertaining to the user's request, use your tools to read files and gather the relevant information: do NOT guess or make up an answer.
-
-## PLANNING
-You MUST plan extensively before each function call, and reflect extensively on the outcomes of the previous function calls. DO NOT do this entire process by making function calls only, as this can impair your ability to solve the problem and think insightfully.
-
-## USER QUERY
-{{query}}`,
-        isJsonOutput: false,
-        variables: [{ name: "query", value: "" }],
-        llmId: "o3-mini",
-        instructions: ""
-    },
-    {
         id: "blank",
         name: "Blank",
+        description: "",
         content: "",
         isJsonOutput: false,
         variables: [],

@@ -48,7 +48,7 @@ const OutputPanel: React.FC<OutputPanelProps> = ({
         }
     } else if (output) {
         content = (
-            <div className="prose prose-sm dark:prose-invert max-w-none">
+            <div className="h-full prose-sm dark:prose-invert max-w-none">
                 <ReactMarkdown>{output}</ReactMarkdown>
             </div>
         );

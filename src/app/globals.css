@@ -3,6 +3,12 @@
   themes: dark --default;
 };
 
+main {
+  zoom: 0.8; /* fix para mac window size */
+}
+
+
+
 /* :root {
   --background: #ffffff;
   --foreground: #171717;

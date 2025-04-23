@@ -23,6 +23,11 @@ export type LLMOption = {
 
 // Extended Prompt type used in page.tsx (and likely needed by VariableManager)
 export type Prompt = BasePrompt & {
+    /**
+     * Descripción en bulletpoints para mostrar debajo de PromptActions en el Editor Panel.
+     * Puede ser string vacío o undefined si no aplica.
+     */
+    description?: string;
     variables?: Variable[];
     llmId?: string;
     instructions?: string; // Added instructions field

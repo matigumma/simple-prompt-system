@@ -107,6 +107,10 @@ function MainContent() {
                     />
                   )}
                 </div>
+                {/* Descripción del prompt debajo de PromptActions */}
+                <div className="mb-2 mt-0  text-neutral-400 whitespace-pre-line pl-1">
+                  {activePrompt?.description}
+                </div>
                 <div className="flex-shrink-0">
                   <LLMSelector
                     options={llmOptions}
@@ -179,57 +183,59 @@ function MainContent() {
                 onCopy={handleCopyOutput}
                 error={error}
               />
+
+              {/* History Panel */}
+              <div className="mt-8">
+                <div className="bg-neutral-900 border border-neutral-800 rounded-xl shadow-lg p-6 overflow-scroll" style={{ maxHeight: 180 }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-white">Prompt History</h2>
+                    {historyError && <span className="text-red-500 text-xs ml-2">{historyError}</span>}
+                    <button
+                      className="btn btn-xs btn-outline btn-error"
+                      title="Limpiar historial"
+                      onClick={clearPromptHistory}
+                      disabled={history.length === 0}
+                      type="button"
+                    >
+                      Limpiar historial
+                    </button>
+                  </div>
+                  <table className="min-w-full border text-sm bg-neutral-950 text-white rounded">
+                    <thead>
+                      <tr className="bg-neutral-800">
+                        <th className="border px-2 py-1">#</th>
+                        <th className="border px-2 py-1">Prompt</th>
+                        <th className="border px-2 py-1">Result</th>
+                        <th className="border px-2 py-1">Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {history.length === 0 ? (
+                        <tr>
+                          <td className="border px-2 py-1 text-center" colSpan={4}>No history yet.</td>
+                        </tr>
+                      ) : (
+                        history.map((h, i) => (
+                          <tr
+                            key={h.id ?? i}
+                            className="cursor-pointer hover:bg-neutral-800"
+                            onClick={() => viewHistoryDetails(h)}
+                          >
+                            <td className="border px-2 py-1">{i + 1}</td>
+                            <td className="border px-2 py-1 max-w-xs break-words truncate">{h.prompt}</td>
+                            <td className="border px-2 py-1 max-w-xs break-words truncate">{h.result}</td>
+                            <td className="border px-2 py-1">{new Date(h.timestamp).toISOString()}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* History Panel */}
-          <div className="mt-8">
-            <div className="bg-neutral-900 border border-neutral-800 rounded-xl shadow-lg p-6 overflow-scroll" style={{ maxHeight: 180 }}>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-white">Prompt History</h2>
-                {historyError && <span className="text-red-500 text-xs ml-2">{historyError}</span>}
-                <button
-                  className="btn btn-xs btn-outline btn-error"
-                  title="Limpiar historial"
-                  onClick={clearPromptHistory}
-                  disabled={history.length === 0}
-                  type="button"
-                >
-                  Limpiar historial
-                </button>
-              </div>
-              <table className="min-w-full border text-sm bg-neutral-950 text-white rounded">
-                <thead>
-                  <tr className="bg-neutral-800">
-                    <th className="border px-2 py-1">#</th>
-                    <th className="border px-2 py-1">Prompt</th>
-                    <th className="border px-2 py-1">Result</th>
-                    <th className="border px-2 py-1">Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.length === 0 ? (
-                    <tr>
-                      <td className="border px-2 py-1 text-center" colSpan={4}>No history yet.</td>
-                    </tr>
-                  ) : (
-                    history.map((h, i) => (
-                      <tr
-                        key={h.id ?? i}
-                        className="cursor-pointer hover:bg-neutral-800"
-                        onClick={() => viewHistoryDetails(h)}
-                      >
-                        <td className="border px-2 py-1">{i + 1}</td>
-                        <td className="border px-2 py-1 max-w-xs break-words truncate">{h.prompt}</td>
-                        <td className="border px-2 py-1 max-w-xs break-words truncate">{h.result}</td>
-                        <td className="border px-2 py-1">{new Date(h.timestamp).toISOString()}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+
         </section>
       </main>
 
