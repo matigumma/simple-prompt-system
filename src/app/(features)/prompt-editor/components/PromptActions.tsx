@@ -29,9 +29,7 @@ const PromptActions: React.FC<PromptActionsProps> = ({
     return (
         <div className="flex flex-row items-center gap-2">
             {/* <div className="mb-2 flex items-center gap-2 min-w-[200px]"> */}
-            <label htmlFor="llm-select" className="text-sm font-bold">
-                Prompt Name:
-            </label>
+            
             {editing ? (
                 <input
                     className="input input-ghost w-56"
@@ -52,7 +50,7 @@ const PromptActions: React.FC<PromptActionsProps> = ({
                         title="Rename"
                         onClick={() => setEditing(true)}
                     >
-                        ✏️
+                        
                     </button>
                 </>
             )}

@@ -41,7 +41,7 @@ export default function PromptEditor({ value, onChange, disabled }: PromptEditor
                     fontSize: 14,
                     background: "inherit",
                     minHeight: 200,
-                    maxHeight: 400,
+                    maxHeight: 600,
                     borderRadius: 8,
                     overflowY: "scroll",
                 }}
