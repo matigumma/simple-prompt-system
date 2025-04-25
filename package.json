@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "daisyui": "^5.0.20",
     "next": "15.3.0",
     "openai": "^4.94.0",
     "prismjs": "^1.30.0",
@@ -26,6 +25,7 @@
     "@types/prismjs": "^1.26.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "daisyui": "^5.0.28",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
     "tailwindcss": "^4",

@@ -91,7 +91,7 @@ function MainContent() {
         </button>
         
         {/* Sidebar - Prompt Library */}
-        <aside className={`${sidebarCollapsed ? '-translate-x-full' : 'translate-x-0'} transition-transform duration-300 absolute md:relative md:translate-x-0 z-10 h-full w-72 min-w-[200px] max-w-[280px] bg-neutral-800 flex-shrink-0 flex flex-col shadow-xl overflow-y-auto`}>
+        <aside className={`${sidebarCollapsed ? '-translate-x-full' : 'translate-x-0'} transition-transform duration-300 absolute md:relative md:translate-x-0 z-10 h-full w-72 min-w-[200px] max-w-[280px] bg-neutral-800 flex-shrink-0 flex flex-col shadow-xl overflow-y-auto overflow-x-hidden`}>
           <div className="p-3 bg-gradient-to-r from-blue-900 to-neutral-800 text-white font-medium">
             <h2 className="text-lg flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

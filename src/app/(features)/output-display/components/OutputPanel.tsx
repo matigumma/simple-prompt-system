@@ -39,7 +39,7 @@ const OutputPanel: React.FC<OutputPanelProps> = ({
         } else {
             content = (
                 <div>
-                    <pre className="bg-neutral-100 dark:bg-neutral-800 rounded p-2 text-xs overflow-x-auto text-red-700 dark:text-red-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-800 rounded p-4 text-xs overflow-x-auto text-red-700 dark:text-red-300">
                         {output}
                     </pre>
                     <div className="text-xs text-red-600 mt-1">{jsonErr}</div>
@@ -48,7 +48,7 @@ const OutputPanel: React.FC<OutputPanelProps> = ({
         }
     } else if (output) {
         content = (
-            <div className="h-full prose-sm dark:prose-invert max-w-none">
+            <div className="h-full p-4 prose-sm dark:prose-invert max-w-none">
                 <ReactMarkdown>{output}</ReactMarkdown>
             </div>
         );
@@ -62,7 +62,7 @@ const OutputPanel: React.FC<OutputPanelProps> = ({
 
     return (
         <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 p-4">
                 <span className="font-semibold text-sm">Output</span>
                 <button
                     className="btn btn-xs btn-outline"
@@ -74,7 +74,8 @@ const OutputPanel: React.FC<OutputPanelProps> = ({
                     📋 Copy
                 </button>
             </div>
-            <div className="flex-1 overflow-auto min-h-[120px] max-h-[400px]">
+            <hr/>
+            <div className="flex-1 overflow-auto min-h-[120px] ">
                 {isLoading ? (
                     <div className="flex items-center justify-center h-full text-blue-500">
                         <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
